@@ -1,0 +1,141 @@
+-- DDL do projeto MindsY
+-- 11 tabelas
+
+CREATE SCHEMA IF NOT exists MINDSY;
+
+USE MINDSY;
+
+CREATE TABLE IF NOT EXISTS PERSON (
+    id_person BIGINT AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    CONSTRAINT PERSON_PK PRIMARY KEY (id_person),
+    CONSTRAINT PERSON_AK UNIQUE (email)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS TELEPHONE (
+    number BIGINT,
+    type ENUM('comercial', 'residencial', 'pessoal') NOT NULL,
+    id_person BIGINT NOT NULL,
+    CONSTRAINT TELEPHONE_PK PRIMARY KEY (number),
+    CONSTRAINT TELEPHONE_FK FOREIGN KEY (id_person)
+        REFERENCES PERSON (id_person)
+        ON DELETE CASCADE
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS PATIENT (
+    id_patient BIGINT AUTO_INCREMENT,
+    registry_number VARCHAR(11),
+    dt_birth DATE NOT NULL,
+    scholarity VARCHAR(100) NOT NULL,
+    observation VARCHAR(255),
+    manual_domain ENUM('destro', 'canhoto') NOT NULL,
+    fk_person BIGINT NOT NULL,
+    CONSTRAINT PATIENT_PK PRIMARY KEY (id_patient),
+    CONSTRAINT PATIENT_FK FOREIGN KEY (fk_person)
+        REFERENCES PERSON (id_person)
+        ON DELETE CASCADE,
+    CONSTRAINT PATIENT_AK UNIQUE (registry_number , fk_person)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS ACCOUNTABLE (
+    registry_number VARCHAR(11),
+    kinship_degree VARCHAR(15) NOT NULL,
+    fk_patient BIGINT NOT NULL,
+    fk_person BIGINT NOT NULL,
+    CONSTRAINT ACCOUNTABLE_PK PRIMARY KEY (registry_number),
+    CONSTRAINT ACCOUNTABLE_FK FOREIGN KEY (fk_patient)
+        REFERENCES PATIENT (id_patient),
+    CONSTRAINT ACCOUNTABLE_FK2 FOREIGN KEY (fk_person)
+        REFERENCES PERSON (id_person)
+        ON DELETE CASCADE,
+    CONSTRAINT ACCOUNTABLE_AK UNIQUE (fk_patient , fk_person)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS HOSPITAL (
+    registry_number VARCHAR(14),
+    social_reason VARCHAR(100) NOT NULL,
+    fk_person BIGINT NOT NULL,
+    CONSTRAINT HOSPITAL_PK PRIMARY KEY (registry_number),
+    CONSTRAINT HOSPITAL_FK FOREIGN KEY (fk_person)
+        REFERENCES PERSON (id_person)
+        ON DELETE CASCADE
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS PSYCHOLOGIST (
+    crp VARCHAR(7),
+    dt_birth DATE NOT NULL,
+    public_id VARCHAR(255),
+    password VARCHAR(50) NOT NULL,
+    fk_person BIGINT NOT NULL,
+    CONSTRAINT PSYCHOLOGIST_PK PRIMARY KEY (crp),
+    CONSTRAINT PSYCHOLOGIST_FK FOREIGN KEY (fk_person)
+        REFERENCES PERSON (id_person)
+        ON DELETE CASCADE,
+    CONSTRAINT PSYCHOLOGIST_AK UNIQUE (fk_person)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS PSYCHOLOGIST_HOSPITAL (
+    id_psycho_hosp BIGINT AUTO_INCREMENT,
+    crp_psychologist VARCHAR(7) NOT NULL,
+    id_hospital VARCHAR(14) NOT NULL,
+    CONSTRAINT PSYCHOLOGIST_HOSPITAL_PK PRIMARY KEY (id_psycho_hosp),
+    CONSTRAINT PSYCHOLOGIST_HOSPITAL_FK FOREIGN KEY (crp_psychologist)
+        REFERENCES PSYCHOLOGIST (crp),
+    CONSTRAINT PSYCHOLOGIST_HOSPITAL_FK2 FOREIGN KEY (id_hospital)
+        REFERENCES HOSPITAL (registry_number),
+    CONSTRAINT PSYCHOLOGIST_HOSPITAL_AK UNIQUE (crp_psychologist , id_hospital)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS PAT_PSYCHO_HOSP (
+    id_pat_psycho_hosp BIGINT AUTO_INCREMENT,
+    fk_psycho_hosp BIGINT NOT NULL,
+    fk_patient BIGINT NOT NULL,
+    CONSTRAINT PAT_PSYCHO_HOSP_PK PRIMARY KEY (id_pat_psycho_hosp),
+    CONSTRAINT PAT_PSYCHO_HOSP_FK FOREIGN KEY (fk_psycho_hosp)
+        REFERENCES PSYCHOLOGIST_HOSPITAL (id_psycho_hosp),
+    CONSTRAINT PAT_PSYCHO_HOSP_FK2 FOREIGN KEY (fk_patient)
+        REFERENCES PATIENT (id_patient),
+    CONSTRAINT PAT_PSYCHO_HOSP_AK UNIQUE (fk_psycho_hosp , fk_patient)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS EVALUATION (
+    id_evaluation BIGINT AUTO_INCREMENT,
+    dt_start DATE NOT NULL,
+    dt_end DATE,
+    diagnosis VARCHAR(100),
+    observation TEXT,
+    orientation TEXT,
+    fk_pat_psycho_hosp BIGINT NOT NULL,
+    CONSTRAINT EVALUATION_PK PRIMARY KEY (id_evaluation),
+    CONSTRAINT EVALUATION_FK FOREIGN KEY (fk_pat_psycho_hosp)
+        REFERENCES PAT_PSYCHO_HOSP (id_pat_psycho_hosp)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS TEST (
+    id_test BIGINT AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(255),
+    maximum_score DECIMAL(4),
+    id_test_child BIGINT,
+    CONSTRAINT TEST_PK PRIMARY KEY (id_test)
+)  ENGINE=INNODB;
+
+ALTER TABLE TEST
+ADD CONSTRAINT TEST_FK FOREIGN KEY (id_test_child) REFERENCES TEST(id_test);
+
+CREATE TABLE IF NOT EXISTS RESULT (
+    id_result BIGINT AUTO_INCREMENT,
+    gross_score DECIMAL(4) NOT NULL,
+    considerate_score DECIMAL(4) NOT NULL,
+    classification VARCHAR(20) NOT NULL,
+    observation VARCHAR(255),
+    fk_test BIGINT NOT NULL,
+    fk_evaluation BIGINT NOT NULL,
+    CONSTRAINT RESULT_PK PRIMARY KEY (id_result),
+    CONSTRAINT RESULT_FK FOREIGN KEY (fk_test)
+        REFERENCES TEST (id_test),
+    CONSTRAINT RESULT_FK2 FOREIGN KEY (fk_evaluation)
+        REFERENCES EVALUATION (id_evaluation)
+)  ENGINE=INNODB;
+
