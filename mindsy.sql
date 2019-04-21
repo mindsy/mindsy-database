@@ -1,7 +1,9 @@
 -- DDL do projeto MindsY
 -- 11 tabelas
 
-CREATE SCHEMA IF NOT exists MINDSY;
+CREATE DATABASE IF NOT EXISTS MINDSY
+  CHARACTER SET utf8
+  COLLATE utf8_general_ci;
 
 USE MINDSY;
 
