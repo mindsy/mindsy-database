@@ -16,13 +16,24 @@ CREATE TABLE IF NOT EXISTS PERSON (
 )  ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS TELEPHONE (
-    number BIGINT,
+    number VARCHAR(15),
     type ENUM('comercial', 'residencial', 'pessoal') NOT NULL,
     id_person BIGINT NOT NULL,
     CONSTRAINT TELEPHONE_PK PRIMARY KEY (number),
     CONSTRAINT TELEPHONE_FK FOREIGN KEY (id_person)
         REFERENCES PERSON (id_person)
         ON DELETE CASCADE
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS ACCOUNTABLE (
+    registry_number VARCHAR(11),
+    kinship_degree VARCHAR(15) NOT NULL,
+    fk_person BIGINT NOT NULL,
+    CONSTRAINT ACCOUNTABLE_PK PRIMARY KEY (registry_number),
+    CONSTRAINT ACCOUNTABLE_FK2 FOREIGN KEY (fk_person)
+        REFERENCES PERSON (id_person)
+        ON DELETE CASCADE,
+    CONSTRAINT ACCOUNTABLE_AK UNIQUE (fk_person)
 )  ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS PATIENT (
@@ -33,25 +44,15 @@ CREATE TABLE IF NOT EXISTS PATIENT (
     observation VARCHAR(255),
     manual_domain ENUM('destro', 'canhoto') NOT NULL,
     fk_person BIGINT NOT NULL,
+    fk_accountable VARCHAR(11),
+	status ENUM('andamento', 'finalizado', 'aguardando') NOT NULL,
     CONSTRAINT PATIENT_PK PRIMARY KEY (id_patient),
     CONSTRAINT PATIENT_FK FOREIGN KEY (fk_person)
         REFERENCES PERSON (id_person)
         ON DELETE CASCADE,
+	CONSTRAINT PATIENT_FK2 FOREIGN KEY (fk_accountable)
+        REFERENCES ACCOUNTABLE (registry_number),
     CONSTRAINT PATIENT_AK UNIQUE (registry_number , fk_person)
-)  ENGINE=INNODB;
-
-CREATE TABLE IF NOT EXISTS ACCOUNTABLE (
-    registry_number VARCHAR(11),
-    kinship_degree VARCHAR(15) NOT NULL,
-    fk_patient BIGINT NOT NULL,
-    fk_person BIGINT NOT NULL,
-    CONSTRAINT ACCOUNTABLE_PK PRIMARY KEY (registry_number),
-    CONSTRAINT ACCOUNTABLE_FK FOREIGN KEY (fk_patient)
-        REFERENCES PATIENT (id_patient),
-    CONSTRAINT ACCOUNTABLE_FK2 FOREIGN KEY (fk_person)
-        REFERENCES PERSON (id_person)
-        ON DELETE CASCADE,
-    CONSTRAINT ACCOUNTABLE_AK UNIQUE (fk_patient , fk_person)
 )  ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS HOSPITAL (
@@ -67,7 +68,6 @@ CREATE TABLE IF NOT EXISTS HOSPITAL (
 CREATE TABLE IF NOT EXISTS PSYCHOLOGIST (
     crp VARCHAR(7),
     dt_birth DATE NOT NULL,
-    public_id VARCHAR(255),
     password VARCHAR(50) NOT NULL,
     fk_person BIGINT NOT NULL,
     CONSTRAINT PSYCHOLOGIST_PK PRIMARY KEY (crp),
@@ -140,4 +140,3 @@ CREATE TABLE IF NOT EXISTS RESULT (
     CONSTRAINT RESULT_FK2 FOREIGN KEY (fk_evaluation)
         REFERENCES EVALUATION (id_evaluation)
 )  ENGINE=INNODB;
-
