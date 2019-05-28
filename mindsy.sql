@@ -106,9 +106,8 @@ CREATE TABLE IF NOT EXISTS EVALUATION (
     id_evaluation BIGINT AUTO_INCREMENT,
     dt_start DATE NOT NULL,
     dt_end DATE,
-    diagnosis VARCHAR(100),
-    observation TEXT,
-    orientation TEXT,
+    conclusion LONGTEXT,
+    anamnese LONGTEXT,
     fk_pat_psycho_hosp BIGINT NOT NULL,
     CONSTRAINT EVALUATION_PK PRIMARY KEY (id_evaluation),
     CONSTRAINT EVALUATION_FK FOREIGN KEY (fk_pat_psycho_hosp)
@@ -120,24 +119,28 @@ CREATE TABLE IF NOT EXISTS TEST (
     name VARCHAR(100) NOT NULL,
     description VARCHAR(255),
     maximum_score DECIMAL(4),
-    id_test_child BIGINT,
+	type ENUM('verbal', 'executivo') NOT NULL,
     CONSTRAINT TEST_PK PRIMARY KEY (id_test)
 )  ENGINE=INNODB;
 
-ALTER TABLE TEST
-ADD CONSTRAINT TEST_FK FOREIGN KEY (id_test_child) REFERENCES TEST(id_test);
+CREATE TABLE IF NOT EXISTS EVALUATION_TEST (
+    id_evaluation_test BIGINT AUTO_INCREMENT,
+	fk_evaluation bigint NOT NULL,
+    fk_test bigint not null,
+    CONSTRAINT EVALUATION_TEST_PK PRIMARY KEY (id_evaluation_test),
+	CONSTRAINT EVALUATION_TEST_FK1 FOREIGN KEY (fk_evaluation)
+        REFERENCES EVALUATION (id_evaluation),
+	CONSTRAINT EVALUATION_TEST_FK2 FOREIGN KEY (fk_test)
+        REFERENCES TEST (id_test)
+)  ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS RESULT (
     id_result BIGINT AUTO_INCREMENT,
     gross_score DECIMAL(4) NOT NULL,
     considerate_score DECIMAL(4) NOT NULL,
     classification VARCHAR(20) NOT NULL,
-    observation VARCHAR(255),
-    fk_test BIGINT NOT NULL,
-    fk_evaluation BIGINT NOT NULL,
+    fk_evaluation_test BIGINT NOT NULL,
     CONSTRAINT RESULT_PK PRIMARY KEY (id_result),
-    CONSTRAINT RESULT_FK FOREIGN KEY (fk_test)
-        REFERENCES TEST (id_test),
-    CONSTRAINT RESULT_FK2 FOREIGN KEY (fk_evaluation)
-        REFERENCES EVALUATION (id_evaluation)
+    CONSTRAINT RESULT_FK FOREIGN KEY (fk_evaluation_test)
+        REFERENCES EVALUATION_TEST (id_evaluation_test)
 )  ENGINE=INNODB;
