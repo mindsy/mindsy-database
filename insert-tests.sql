@@ -3,7 +3,7 @@
 
 USE MINDSY;
 
--- INSERT INTO TEST (name, description, maximum_score, type) VALUES ('Cubos', 'Testes com cubos', 69.00, 'executivo');
+INSERT INTO TEST (name, description, maximum_score, type) VALUES ('Cubos', 'Testes com cubos', 69.00, 'executivo');
 INSERT INTO TEST (name, description, maximum_score, type) VALUES ('Conceitos Figurativos', 'Testes com Conceitos Figurativos', 28.00, 'executivo');
 INSERT INTO TEST (name, description, maximum_score, type) VALUES ('Aritmética', 'Testes com Aritmética', 30.00, 'executivo');
 INSERT INTO TEST (name, description, maximum_score, type) VALUES ('Dígitos', 'Testes com Dígitos', 30.00, 'executivo');
