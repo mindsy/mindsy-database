@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS EVALUATION_TEST (
 
 CREATE TABLE IF NOT EXISTS RESULT (
     id_result BIGINT AUTO_INCREMENT,
-    gross_score DECIMAL(4) NOT NULL,
+    gross_score DECIMAL(5) NOT NULL,
     considerate_score DECIMAL(4) NOT NULL,
     classification VARCHAR(20) NOT NULL,
     fk_evaluation_test BIGINT NOT NULL,
